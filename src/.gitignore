@@ -1,0 +1,6 @@
+*.swp
+*.make
+*.DS_Store
+*.cmake
+Makefile
+*.txt
