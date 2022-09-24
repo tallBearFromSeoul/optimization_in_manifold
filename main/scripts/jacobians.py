@@ -22,7 +22,7 @@ def jacob_exp_map_from_so3_to_SU2(k: np.ndarray):
     s_2 = np.sin(theta_2)
     c_2 = np.cos(theta_2)
     s_2_theta = s_2 / theta
-    const_0 = ((c_2/(2*theta)) - s_2/(theta**2))
+    const_0 = ((c_2/(2*theta)) - s_2/(theta*theta))
     d_exp_kq__d_wtheta = np.array([
         [0, 0, 0, -s_2/2],
         [s_2_theta, 0, 0, k[0]*const_0],
@@ -72,7 +72,8 @@ def jacob_log_map_from_SO3_to_so3(R: np.ndarray):
         [a3,b,0, -b,a3,0, 0,0,a3]])
 
 def main():
-    k = np.array([1,1,1])
+    k = np.array([1,2,3])
+    k = k / np.linalg.norm(k)
     print(k)
     euler_angles_deg = np.array([45,30,20])
     euler_angles_rad = deg2rad(euler_angles_deg)
@@ -80,6 +81,7 @@ def main():
 
     print(jacob_exp_map_from_so3_to_SO3())
     print(jacob_exp_map_from_so3_to_SU2(k))
+    print('R', R)
     print(jacob_log_map_from_SO3_to_so3(R))
 
 if __name__=='__main__':

@@ -1,0 +1,113 @@
+#ifndef SE3_HPP
+#define SE3_HPP
+#include "conversion.hpp"
+#include "slerp.hpp"
+
+typedef Eigen::RowVector3f RowVec3f;
+
+class Rotation {
+	private:
+
+	protected:
+		const bool _has_euler;
+		EulerAng _euler;
+		Mat3f _R;
+		Quat _q;
+		Vec3f _k;
+
+	public:
+	Rotation(const EulerAng &__euler): _has_euler(true), _euler(__euler) {
+		R_from_euler_ang(__euler, _R);
+		q_from_euler_ang(__euler, _q);
+		log_map_from_SU2_to_so3(_q, _k);
+	}
+	
+	Rotation(const Vec3f &__k) : _has_euler(false), _k(__k) {
+		exp_map_from_so3_to_SO3(__k, _R);
+		exp_map_from_so3_to_SU2(__k, _q);
+	}
+
+	EulerAng euler() const {
+		if (_has_euler)
+			return _euler;
+		else
+			return EulerAng(0,0,0,false);
+	}
+	Mat3f R() const {return _R;}
+	Quat q() const {return _q;}
+	Vec3f k() const {return _k;}
+};
+
+class SE3 : public Rotation{
+	private:
+		Vec3f _trans;
+		Mat4f _T;
+	protected:
+
+	public:
+		SE3(const EulerAng &__euler, const Vec3f &__trans) : Rotation(__euler) {
+			_T.block(0,0,3,3) = _R;
+			_T.block(0,3,3,1) = __trans;
+			_T.block(3,0,1,3) = RowVec3f::Zero();
+			_T(3,3) = 1.f;
+		}
+		SE3(const Vec3f &__k) : Rotation(__k) {
+			_T = Mat4f::Zero();
+			_T.block(0,0,3,3) = _R;
+			_T(3,3) = 1.f;
+		}
+		SE3(const Vec3f &__k, const Vec3f &__trans) : Rotation(__k) {
+			_T.block(0,0,3,3) = _R;
+			_T.block(0,3,3,1) = __trans;
+			_T.block(3,0,1,3) = RowVec3f::Zero();
+			_T(3,3) = 1.f;
+		}
+		Rotation rot() const {return *this;}
+		Vec3f trans() const {return _trans;}
+		Mat4f T() const {return _T;}
+		SE3 operator*(SE3 se3) {
+			return _T*se3.T();
+		}
+};
+
+typedef std::shared_ptr<SE3> SE3_ptr;
+
+class KinematicChain {
+	private:
+		std::vector<Vec3f> _twists;
+		std::vector<Vec3f> _trans;
+		std::vector<SE3_ptr> _chain; 
+
+	public:
+		KinematicChain(const Vec3f &__base_twist, const SE3_ptr &__base_pose) {
+			_twists.push_back(__base_twists);
+			Vec3f k0, k1;
+			float a, b, c;
+			k0 = __base_pose.k();
+			k1 = __base_twist;
+			a = k0.norm();
+			b = k1.norm();
+			c = acos(cos(a)*cos(b)-sin(a)*sin(b)*k0.dot(k1))
+
+
+
+			SE3 twist(__base_twist);
+			__base_pose*twist;
+			_chain.push_back(__base_pose);
+			if(!_trans.size())
+				_trans.clear();
+		}
+
+		void add_internal_twist(const Vec3f &__twist, const Vec3f &__trans) {
+			_twists.push_back(__twist);
+			_trans.push_back(__trans);
+			assert(_twists.size() == _trans.size()+1);
+		}
+
+		void add_end_effector(const Vec3f &__trans) {
+			_trans.push_back(__trans);
+			assert(_twists.size() == _trans.size());
+		}
+};
+
+#endif

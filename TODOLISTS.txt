@@ -2,7 +2,13 @@
 
 ### Fri Sep 9th 2022 : 
 - Use testing tools googletest and mocking tools from googletest
-- Use bezel for build tool rather than cmake
+- Use bazel for build tool rather than cmake
 - Translate all python to C++ efficiently
 
 - BUG : conversion.py and conversion.hpp need to fix the quadrants checking when converting back both from rotation matrix and quaternion to euler angles
+
+### Thu Sep 15th 2022 :
+- Will use googletest
+- Built with Bazel
+- Translated all files to c++
+- I have to write SE3 stuff in python first I guess, maybe even finishing the metrics thing as well.

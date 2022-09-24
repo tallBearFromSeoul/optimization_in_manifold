@@ -17,6 +17,7 @@
 void slerp_R(const Mat3f &__R1, const Mat3f &__R2, int __n_steps, std::vector<Mat3f> &Rs_interp__) {
 	if (Rs_interp__.size())
 		Rs_interp__.clear();
+	Rs_interp__.push_back(__R1);
 	Vec3f k;
 	log_map_from_SO3_to_so3(__R1.inverse()*__R2, k);
 	for (int i=1; i<__n_steps; i++) {	
@@ -30,6 +31,7 @@ void slerp_R(const Mat3f &__R1, const Mat3f &__R2, int __n_steps, std::vector<Ma
 void slerp_q_direct(const Quat &__q1, const Quat &__q2, int __n_steps, std::vector<Quat> &Qs_interp__) {
 	if (Qs_interp__.size())
 		Qs_interp__.clear();
+	Qs_interp__.push_back(__q1);
 	Quat q1_inv_q2 = __q1.inverse()*__q2;
 	for (int i=1; i<__n_steps; i++) {
 		float lambda = 1.0f * static_cast<float>(i) / static_cast<float>(__n_steps-1);
@@ -42,6 +44,7 @@ void slerp_q_direct(const Quat &__q1, const Quat &__q2, int __n_steps, std::vect
 void slerp_q_exp_and_log(const Quat &__q1, const Quat &__q2, int __n_steps, std::vector<Quat> &Qs_interp__) {
 	if (Qs_interp__.size())
 		Qs_interp__.clear();
+	Qs_interp__.push_back(__q1);
 	Quat q1_inv_q2 = __q1.inverse()*__q2;
 	Vec3f k_log;
 	log_map_from_SU2_to_so3(q1_inv_q2, k_log);
